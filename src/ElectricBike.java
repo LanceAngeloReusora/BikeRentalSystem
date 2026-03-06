@@ -5,6 +5,6 @@ public class ElectricBike extends Bike{
 
     @Override
     public double calculateRentalCost(int hours) {
-        return(getRatePerHour() * hours) + 20;
+        return(getRatePerHour() * hours);
     }
 }
