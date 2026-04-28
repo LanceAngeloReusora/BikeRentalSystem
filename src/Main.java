@@ -5,7 +5,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         BikeRentalService service = new BikeRentalService();
 
-        //example bikes
+        // Example bikes
         service.addBike(new MountainBike("M1", "Trek"));
         service.addBike(new BMXBike("B1", "Haro"));
         service.addBike(new RoadBike("R1", "Giant"));
@@ -17,7 +17,9 @@ public class Main {
             System.out.println("1. Register Customer");
             System.out.println("2. View Available Bikes");
             System.out.println("3. Rent Bike");
-            System.out.println("4. Exit");
+            System.out.println("4. Return Bike");
+            System.out.println("5. View Active Rentals");
+            System.out.println("6. Exit");
             System.out.print("Choose option: ");
 
             int choice = sc.nextInt();
@@ -64,7 +66,10 @@ public class Main {
                     int hours = sc.nextInt();
                     sc.nextLine();
 
-                    Rental rental = new Rental("R" + customerId, customer, bike, hours);
+                    String rentalId = "R" + customerId + "-" + bikeId;
+                    Rental rental = new Rental(rentalId, customer, bike, hours);
+                    service.addRental(rental);
+
                     Receipt.printReceipt(rental);
 
                     Payment payment = new Payment("P" + customerId, rental.getTotalCost(), "Cash");
@@ -72,6 +77,31 @@ public class Main {
                     break;
 
                 case 4:
+                    System.out.print("Enter Rental ID to return: ");
+                    String rid = sc.nextLine();
+
+                    Rental activeRental = service.findActiveRental(rid);
+
+                    if (activeRental == null) {
+                        System.out.println("No active rental found with that ID.\n");
+                        break;
+                    }
+
+                    activeRental.returnBike();
+                    System.out.println("\n===== BIKE RETURNED =====");
+                    System.out.println("Rental ID : " + activeRental.getRentalId());
+                    System.out.println("Bike      : " + activeRental.getBike().getBrand()
+                            + " (" + activeRental.getBike().getBikeId() + ")");
+                    System.out.println("Customer  : " + activeRental.getCustomer().getName());
+                    System.out.println("Status    : Returned successfully. Bike is now available.");
+                    System.out.println("=========================\n");
+                    break;
+
+                case 5:
+                    service.displayActiveRentals();
+                    break;
+
+                case 6:
                     System.out.println("Thank you for using the system!");
                     return;
 

@@ -5,6 +5,7 @@ public class Rental {
     private Bike bike;
     private int hours;
     private double totalCost;
+    private boolean isReturned;
 
     public Rental(String rentalId, Customer customer, Bike bike, int hours) {
         this.rentalId = rentalId;
@@ -12,11 +13,37 @@ public class Rental {
         this.bike = bike;
         this.hours = hours;
         this.totalCost = bike.calculateRentalCost(hours);
+        this.isReturned = false;
         bike.setAvailable(false);
+    }
+
+    public String getRentalId() {
+        return rentalId;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public Bike getBike() {
+        return bike;
+    }
+
+    public int getHours() {
+        return hours;
     }
 
     public double getTotalCost() {
         return totalCost;
+    }
+
+    public boolean isReturned() {
+        return isReturned;
+    }
+
+    public void returnBike() {
+        this.isReturned = true;
+        bike.setAvailable(true);
     }
 
     public void displayRental() {
@@ -24,7 +51,8 @@ public class Rental {
         System.out.println("Rental ID: " + rentalId);
         customer.displayCustomer();
         bike.displayInfo();
-        System.out.println("Hours: " + hours);
-        System.out.println("Total Cost: " + totalCost);
+        System.out.println("Hours Rented: " + hours);
+        System.out.println("Total Cost: PHP " + totalCost);
+        System.out.println("Status: " + (isReturned ? "Returned" : "Active"));
     }
 }
