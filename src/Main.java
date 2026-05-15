@@ -87,14 +87,43 @@ public class Main {
                         break;
                     }
 
-                    activeRental.returnBike();
-                    System.out.println("\n===== BIKE RETURNED =====");
-                    System.out.println("Rental ID : " + activeRental.getRentalId());
-                    System.out.println("Bike      : " + activeRental.getBike().getBrand()
+                    System.out.println("Booked Hours: " + activeRental.getBookedHours());
+                    System.out.print("Enter Actual Hours Used: ");
+                    int actualHours = sc.nextInt();
+                    sc.nextLine();
+
+                    activeRental.returnBike(actualHours);
+
+                    System.out.println("\n===== RETURN SUMMARY =====");
+                    System.out.println("Rental ID     : " + activeRental.getRentalId());
+                    System.out.println("Customer      : " + activeRental.getCustomer().getName());
+                    System.out.println("Bike          : " + activeRental.getBike().getBrand()
                             + " (" + activeRental.getBike().getBikeId() + ")");
-                    System.out.println("Customer  : " + activeRental.getCustomer().getName());
-                    System.out.println("Status    : Returned successfully. Bike is now available.");
-                    System.out.println("=========================\n");
+                    System.out.println("Booked Hours  : " + activeRental.getBookedHours());
+                    System.out.println("Actual Hours  : " + actualHours);
+
+                    if (activeRental.getLateFee() > 0) {
+                        int extraHours = actualHours - activeRental.getBookedHours();
+                        System.out.println("Extra Hours   : " + extraHours);
+                        System.out.println("Late Fee      : PHP " + activeRental.getLateFee()
+                                + " (1.5x rate for " + extraHours + " extra hour/s)");
+                    } else {
+                        System.out.println("Late Fee      : None");
+                    }
+
+                    System.out.println("Total Due     : PHP " + activeRental.getTotalCost());
+                    System.out.println("Status        : Bike returned successfully!");
+                    System.out.println("==========================\n");
+
+                    // Process additional payment if there's a late fee
+                    if (activeRental.getLateFee() > 0) {
+                        Payment latePayment = new Payment(
+                                "LP-" + activeRental.getRentalId(),
+                                activeRental.getLateFee(),
+                                "Cash"
+                        );
+                        latePayment.processPayment();
+                    }
                     break;
 
                 case 5:
