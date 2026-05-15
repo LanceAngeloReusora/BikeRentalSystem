@@ -1,8 +1,59 @@
 import java.util.Scanner;
 
 public class Main {
+
+    static Scanner sc = new Scanner(System.in);
+
+    // Safe integer input - keeps asking until a valid number is entered
+    public static int getIntInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            try {
+                int value = Integer.parseInt(input);
+                if (value <= 0) {
+                    System.out.println("  [!] Please enter a positive number.\n");
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("  [!] Invalid input. Please enter a number only.\n");
+            }
+        }
+    }
+
+    // Safe string input - keeps asking until non-empty input is entered
+    public static String getStringInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+            if (input.isEmpty()) {
+                System.out.println("  [!] This field cannot be empty.\n");
+            } else {
+                return input;
+            }
+        }
+    }
+
+    // Safe menu choice - only accepts numbers within the valid range
+    public static int getMenuChoice(int min, int max) {
+        while (true) {
+            System.out.print("Choose option: ");
+            String input = sc.nextLine().trim();
+            try {
+                int value = Integer.parseInt(input);
+                if (value < min || value > max) {
+                    System.out.println("  [!] Please choose between " + min + " and " + max + ".\n");
+                } else {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("  [!] Invalid input. Please enter a number only.\n");
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
         BikeRentalService service = new BikeRentalService();
 
         // Example bikes
@@ -20,23 +71,35 @@ public class Main {
             System.out.println("4. Return Bike");
             System.out.println("5. View Active Rentals");
             System.out.println("6. Exit");
-            System.out.print("Choose option: ");
 
-            int choice = sc.nextInt();
-            sc.nextLine();
+            int choice = getMenuChoice(1, 6);
 
             switch (choice) {
 
                 case 1:
-                    System.out.print("Enter Customer ID: ");
-                    String cid = sc.nextLine();
-                    System.out.print("Enter Name: ");
-                    String name = sc.nextLine();
-                    System.out.print("Enter Contact: ");
-                    String contact = sc.nextLine();
+                    String cid = getStringInput("Enter Customer ID: ");
+
+                    // Check for duplicate customer ID
+                    if (service.findCustomer(cid) != null) {
+                        System.out.println("  [!] Customer ID already exists. Please use a different ID.\n");
+                        break;
+                    }
+
+                    String name = getStringInput("Enter Name: ");
+
+                    // Contact number validation - must be digits only
+                    String contact;
+                    while (true) {
+                        contact = getStringInput("Enter Contact Number: ");
+                        if (contact.matches("\\d+")) {
+                            break;
+                        } else {
+                            System.out.println("  [!] Contact must contain numbers only.\n");
+                        }
+                    }
 
                     service.registerCustomer(new Customer(cid, name, contact));
-                    System.out.println("Customer Registered!\n");
+                    System.out.println("  [✓] Customer Registered Successfully!\n");
                     break;
 
                 case 2:
@@ -44,29 +107,32 @@ public class Main {
                     break;
 
                 case 3:
-                    System.out.print("Enter Customer ID: ");
-                    String customerId = sc.nextLine();
+                    String customerId = getStringInput("Enter Customer ID: ");
                     Customer customer = service.findCustomer(customerId);
 
                     if (customer == null) {
-                        System.out.println("Customer not found!\n");
+                        System.out.println("  [!] Customer not found. Please register first.\n");
                         break;
                     }
 
-                    System.out.print("Enter Bike ID: ");
-                    String bikeId = sc.nextLine();
+                    String bikeId = getStringInput("Enter Bike ID: ");
                     Bike bike = service.findBike(bikeId);
 
                     if (bike == null) {
-                        System.out.println("Bike not available!\n");
+                        System.out.println("  [!] Bike not available or does not exist.\n");
                         break;
                     }
 
-                    System.out.print("Enter Hours: ");
-                    int hours = sc.nextInt();
-                    sc.nextLine();
+                    int hours = getIntInput("Enter Hours to Rent: ");
 
                     String rentalId = "R" + customerId + "-" + bikeId;
+
+                    // Check if this customer already has an active rental for this bike
+                    if (service.findActiveRental(rentalId) != null) {
+                        System.out.println("  [!] This customer already has an active rental for this bike.\n");
+                        break;
+                    }
+
                     Rental rental = new Rental(rentalId, customer, bike, hours);
                     service.addRental(rental);
 
@@ -77,20 +143,27 @@ public class Main {
                     break;
 
                 case 4:
-                    System.out.print("Enter Rental ID to return: ");
-                    String rid = sc.nextLine();
-
+                    String rid = getStringInput("Enter Rental ID to return: ");
                     Rental activeRental = service.findActiveRental(rid);
 
                     if (activeRental == null) {
-                        System.out.println("No active rental found with that ID.\n");
+                        System.out.println("  [!] No active rental found with that ID.\n");
                         break;
                     }
 
-                    System.out.println("Booked Hours: " + activeRental.getBookedHours());
-                    System.out.print("Enter Actual Hours Used: ");
-                    int actualHours = sc.nextInt();
-                    sc.nextLine();
+                    System.out.println("  Booked Hours: " + activeRental.getBookedHours());
+
+                    // Actual hours must be at least 1
+                    int actualHours;
+                    while (true) {
+                        actualHours = getIntInput("Enter Actual Hours Used: ");
+                        if (actualHours < activeRental.getBookedHours()) {
+                            System.out.println("  [!] Actual hours cannot be less than booked hours ("
+                                    + activeRental.getBookedHours() + "). Please re-enter.\n");
+                        } else {
+                            break;
+                        }
+                    }
 
                     activeRental.returnBike(actualHours);
 
@@ -115,7 +188,6 @@ public class Main {
                     System.out.println("Status        : Bike returned successfully!");
                     System.out.println("==========================\n");
 
-                    // Process additional payment if there's a late fee
                     if (activeRental.getLateFee() > 0) {
                         Payment latePayment = new Payment(
                                 "LP-" + activeRental.getRentalId(),
@@ -133,9 +205,6 @@ public class Main {
                 case 6:
                     System.out.println("Thank you for using the system!");
                     return;
-
-                default:
-                    System.out.println("Invalid option.\n");
             }
         }
     }
