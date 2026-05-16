@@ -4,7 +4,6 @@ public class Main {
 
     static Scanner sc = new Scanner(System.in);
 
-    // Safe integer input - keeps asking until a valid number is entered
     public static int getIntInput(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -22,7 +21,6 @@ public class Main {
         }
     }
 
-    // Safe string input - keeps asking until non-empty input is entered
     public static String getStringInput(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -35,7 +33,6 @@ public class Main {
         }
     }
 
-    // Safe menu choice - only accepts numbers within the valid range
     public static int getMenuChoice(int min, int max) {
         while (true) {
             System.out.print("Choose option: ");
@@ -54,9 +51,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
+
         BikeRentalService service = new BikeRentalService();
 
-        // Example bikes
         service.addBike(new MountainBike("M1", "Trek"));
         service.addBike(new BMXBike("B1", "Haro"));
         service.addBike(new RoadBike("R1", "Giant"));
@@ -79,23 +76,18 @@ public class Main {
                 case 1:
                     String cid = getStringInput("Enter Customer ID: ");
 
-                    // Check for duplicate customer ID
                     if (service.findCustomer(cid) != null) {
-                        System.out.println("  [!] Customer ID already exists. Please use a different ID.\n");
+                        System.out.println("  [!] Customer ID already exists.\n");
                         break;
                     }
 
                     String name = getStringInput("Enter Name: ");
 
-                    // Contact number validation - must be digits only
                     String contact;
                     while (true) {
                         contact = getStringInput("Enter Contact Number: ");
-                        if (contact.matches("\\d+")) {
-                            break;
-                        } else {
-                            System.out.println("  [!] Contact must contain numbers only.\n");
-                        }
+                        if (contact.matches("\\d+")) break;
+                        System.out.println("  [!] Contact must contain numbers only.\n");
                     }
 
                     service.registerCustomer(new Customer(cid, name, contact));
@@ -111,7 +103,7 @@ public class Main {
                     Customer customer = service.findCustomer(customerId);
 
                     if (customer == null) {
-                        System.out.println("  [!] Customer not found. Please register first.\n");
+                        System.out.println("  [!] Customer not found.\n");
                         break;
                     }
 
@@ -119,17 +111,15 @@ public class Main {
                     Bike bike = service.findBike(bikeId);
 
                     if (bike == null) {
-                        System.out.println("  [!] Bike not available or does not exist.\n");
+                        System.out.println("  [!] Bike not available.\n");
                         break;
                     }
 
                     int hours = getIntInput("Enter Hours to Rent: ");
-
                     String rentalId = "R" + customerId + "-" + bikeId;
 
-                    // Check if this customer already has an active rental for this bike
                     if (service.findActiveRental(rentalId) != null) {
-                        System.out.println("  [!] This customer already has an active rental for this bike.\n");
+                        System.out.println("  [!] Already rented.\n");
                         break;
                     }
 
@@ -138,7 +128,11 @@ public class Main {
 
                     Receipt.printReceipt(rental);
 
-                    Payment payment = new Payment("P" + customerId, rental.getTotalCost(), "Cash");
+                    Payment payment = new Payment(
+                            "P" + customerId,
+                            rental.getTotalCost(),
+                            Payment.Method.CASH
+                    );
                     payment.processPayment();
                     break;
 
@@ -147,22 +141,18 @@ public class Main {
                     Rental activeRental = service.findActiveRental(rid);
 
                     if (activeRental == null) {
-                        System.out.println("  [!] No active rental found with that ID.\n");
+                        System.out.println("  [!] No active rental found.\n");
                         break;
                     }
 
                     System.out.println("  Booked Hours: " + activeRental.getBookedHours());
 
-                    // Actual hours must be at least 1
                     int actualHours;
                     while (true) {
                         actualHours = getIntInput("Enter Actual Hours Used: ");
                         if (actualHours < activeRental.getBookedHours()) {
-                            System.out.println("  [!] Actual hours cannot be less than booked hours ("
-                                    + activeRental.getBookedHours() + "). Please re-enter.\n");
-                        } else {
-                            break;
-                        }
+                            System.out.println("  [!] Cannot be less than booked hours.\n");
+                        } else break;
                     }
 
                     activeRental.returnBike(actualHours);
@@ -178,21 +168,20 @@ public class Main {
                     if (activeRental.getLateFee() > 0) {
                         int extraHours = actualHours - activeRental.getBookedHours();
                         System.out.println("Extra Hours   : " + extraHours);
-                        System.out.println("Late Fee      : PHP " + activeRental.getLateFee()
-                                + " (1.5x rate for " + extraHours + " extra hour/s)");
+                        System.out.println("Late Fee      : PHP " + activeRental.getLateFee());
                     } else {
                         System.out.println("Late Fee      : None");
                     }
 
                     System.out.println("Total Due     : PHP " + activeRental.getTotalCost());
-                    System.out.println("Status        : Bike returned successfully!");
+                    System.out.println("Status        : Returned successfully!");
                     System.out.println("==========================\n");
 
                     if (activeRental.getLateFee() > 0) {
                         Payment latePayment = new Payment(
                                 "LP-" + activeRental.getRentalId(),
                                 activeRental.getLateFee(),
-                                "Cash"
+                                Payment.Method.CASH
                         );
                         latePayment.processPayment();
                     }
