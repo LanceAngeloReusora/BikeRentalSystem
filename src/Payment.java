@@ -20,5 +20,6 @@ public class Payment {
         System.out.println("Amount Paid: " + amount);
         System.out.println("Method     : " + method);
         System.out.println("==============================\n");
+    
     }
 }
