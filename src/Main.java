@@ -50,6 +50,23 @@ public class Main {
         }
     }
 
+    public static Payment.Method choosePaymentMethod() {
+        System.out.println("\nSelect Payment Method:");
+        System.out.println("1. Cash");
+        System.out.println("2. GCash");
+        System.out.println("3. Maya");
+        System.out.println("4. Bank Transfer");
+
+        int pm = getMenuChoice(1, 4);
+
+        switch (pm) {
+            case 1: return Payment.Method.CASH;
+            case 2: return Payment.Method.GCASH;
+            case 3: return Payment.Method.MAYA;
+            default: return Payment.Method.BANK_TRANSFER;
+        }
+    }
+
     public static void main(String[] args) {
 
         BikeRentalService service = new BikeRentalService();
@@ -91,7 +108,7 @@ public class Main {
                     }
 
                     service.registerCustomer(new Customer(cid, name, contact));
-                    System.out.println("  [✓] Customer Registered Successfully!\n");
+                    System.out.println("\nCustomer Registered Successfully!\n");
                     break;
 
                 case 2:
@@ -128,11 +145,14 @@ public class Main {
 
                     Receipt.printReceipt(rental);
 
+                    Payment.Method method = choosePaymentMethod();
+
                     Payment payment = new Payment(
                             "P" + customerId,
                             rental.getTotalCost(),
-                            Payment.Method.CASH
+                            method
                     );
+
                     payment.processPayment();
                     break;
 
@@ -178,11 +198,15 @@ public class Main {
                     System.out.println("==========================\n");
 
                     if (activeRental.getLateFee() > 0) {
+
+                        Payment.Method lateMethod = choosePaymentMethod();
+
                         Payment latePayment = new Payment(
                                 "LP-" + activeRental.getRentalId(),
                                 activeRental.getLateFee(),
-                                Payment.Method.CASH
+                                lateMethod
                         );
+
                         latePayment.processPayment();
                     }
                     break;
