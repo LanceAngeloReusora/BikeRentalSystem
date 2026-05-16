@@ -53,6 +53,41 @@ public class Main {
         }
     }
 
+    // Let user pick a payment method from the enum
+    public static Payment.Method getPaymentMethod() {
+        System.out.println("  Select Payment Method:");
+        System.out.println("  1. Cash");
+        System.out.println("  2. GCash");
+        System.out.println("  3. Maya");
+        System.out.println("  4. Credit/Debit Card");
+        System.out.println("  5. Bank Transfer");
+
+        int choice;
+        while (true) {
+            System.out.print("  Choose payment method (1-5): ");
+            String input = sc.nextLine().trim();
+            try {
+                choice = Integer.parseInt(input);
+                if (choice < 1 || choice > 5) {
+                    System.out.println("  [!] Please choose between 1 and 5.\n");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("  [!] Invalid input. Please enter a number only.\n");
+            }
+        }
+
+        switch (choice) {
+            case 1: return Payment.Method.CASH;
+            case 2: return Payment.Method.GCASH;
+            case 3: return Payment.Method.MAYA;
+            case 4: return Payment.Method.CREDIT_DEBIT;
+            case 5: return Payment.Method.BANK_TRANSFER;
+            default: return Payment.Method.CASH;
+        }
+    }
+
     public static void main(String[] args) {
         BikeRentalService service = new BikeRentalService();
 
@@ -79,7 +114,6 @@ public class Main {
                 case 1:
                     String cid = getStringInput("Enter Customer ID: ");
 
-                    // Check for duplicate customer ID
                     if (service.findCustomer(cid) != null) {
                         System.out.println("  [!] Customer ID already exists. Please use a different ID.\n");
                         break;
@@ -87,7 +121,6 @@ public class Main {
 
                     String name = getStringInput("Enter Name: ");
 
-                    // Contact number validation - must be digits only
                     String contact;
                     while (true) {
                         contact = getStringInput("Enter Contact Number: ");
@@ -127,7 +160,6 @@ public class Main {
 
                     String rentalId = "R" + customerId + "-" + bikeId;
 
-                    // Check if this customer already has an active rental for this bike
                     if (service.findActiveRental(rentalId) != null) {
                         System.out.println("  [!] This customer already has an active rental for this bike.\n");
                         break;
@@ -138,7 +170,8 @@ public class Main {
 
                     Receipt.printReceipt(rental);
 
-                    Payment payment = new Payment("P" + customerId, rental.getTotalCost(), "Cash");
+                    Payment.Method rentMethod = getPaymentMethod();
+                    Payment payment = new Payment("P" + customerId, rental.getTotalCost(), rentMethod);
                     payment.processPayment();
                     break;
 
@@ -153,7 +186,6 @@ public class Main {
 
                     System.out.println("  Booked Hours: " + activeRental.getBookedHours());
 
-                    // Actual hours must be at least 1
                     int actualHours;
                     while (true) {
                         actualHours = getIntInput("Enter Actual Hours Used: ");
@@ -189,10 +221,11 @@ public class Main {
                     System.out.println("==========================\n");
 
                     if (activeRental.getLateFee() > 0) {
+                        Payment.Method lateMethod = getPaymentMethod();
                         Payment latePayment = new Payment(
                                 "LP-" + activeRental.getRentalId(),
                                 activeRental.getLateFee(),
-                                "Cash"
+                                lateMethod
                         );
                         latePayment.processPayment();
                     }

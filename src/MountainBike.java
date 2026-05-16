@@ -1,11 +1,16 @@
 public class MountainBike extends Bike {
 
-public MountainBike(String id, String brand) {
-    super(id, brand, 50);
-}
+    public MountainBike(String id, String brand) {
+        super(id, brand, 50);
+    }
 
-@Override
-public double calculateRentalCost(int hours) {
-    return getRatePerHour() * hours;
-}
+    @Override
+    public String getType() {
+        return "Mountain Bike";
+    }
+
+    @Override
+    public double calculateRentalCost(int hours) {
+        return getRatePerHour() * hours;
+    }
 }
