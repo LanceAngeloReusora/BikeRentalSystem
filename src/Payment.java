@@ -17,7 +17,7 @@ public class Payment {
     public void processPayment() {
         System.out.println("===== PAYMENT SUCCESSFUL =====");
         System.out.println("Payment ID : " + paymentId);
-        System.out.println("Amount Paid: PHP " + amount);
+        System.out.println("Amount Paid: " + amount);
         System.out.println("Method     : " + method);
         System.out.println("==============================\n");
     }
