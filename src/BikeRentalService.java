@@ -6,12 +6,24 @@ public class BikeRentalService {
     private ArrayList<Customer> customers = new ArrayList<>();
     private ArrayList<Rental> rentals = new ArrayList<>();
 
-    public void addBike(Bike bike) {
+    // Returns true if bike was added, false if ID already exists
+    public boolean addBike(Bike bike) {
+        if (findBikeById(bike.getBikeId()) != null) {
+            System.out.println("  [!] Bike ID \"" + bike.getBikeId() + "\" already exists. Skipping.");
+            return false;
+        }
         bikes.add(bike);
+        return true;
     }
 
-    public void registerCustomer(Customer customer) {
+    // Returns true if customer was added, false if ID already exists
+    public boolean registerCustomer(Customer customer) {
+        if (findCustomer(customer.getCustomerId()) != null) {
+            System.out.println("  [!] Customer ID \"" + customer.getCustomerId() + "\" already exists.");
+            return false;
+        }
         customers.add(customer);
+        return true;
     }
 
     public void addRental(Rental rental) {
@@ -67,6 +79,17 @@ public class BikeRentalService {
         return null;
     }
 
+    // Finds a bike by ID regardless of availability (for duplicate checking)
+    public Bike findBikeById(String id) {
+        for (Bike b : bikes) {
+            if (b.getBikeId().equals(id)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    // Finds an available bike by ID (used when renting)
     public Bike findBike(String id) {
         for (Bike b : bikes) {
             if (b.getBikeId().equals(id) && b.isAvailable()) {
