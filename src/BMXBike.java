@@ -8,4 +8,9 @@ public class BMXBike extends Bike {
 public double calculateRentalCost(int hours) {
 return getRatePerHour() * hours;
 }
+@Override
+public String getType() {
+    return "BMX Bike";
+}
+
 }

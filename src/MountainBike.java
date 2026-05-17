@@ -8,4 +8,9 @@ public MountainBike(String id, String brand) {
 public double calculateRentalCost(int hours) {
     return getRatePerHour() * hours;
 }
+
+@Override
+public String getType() {
+    return "Mountain Bike";
+}
 }
