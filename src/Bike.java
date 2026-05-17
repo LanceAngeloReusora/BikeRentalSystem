@@ -1,40 +1,96 @@
 public abstract class Bike {
 
-private String bikeId;
-private String brand;
-private double ratePerHour;
-private boolean isAvailable;
+    // Enum for bike condition - used when returning a bike
+    public enum Condition {
+        GOOD, DAMAGED
+    }
 
-public Bike(String bikeId, String brand, double ratePerHour) {
-    this.bikeId = bikeId;
-    this.brand = brand;
-    this.ratePerHour = ratePerHour;
-    this.isAvailable = true;
-}
+    private String bikeId;
+    private String brand;
+    private double ratePerHour;
+    private boolean isAvailable;
+    private boolean underMaintenance;
+    private Condition condition;
 
-public String getBikeId() {
-    return bikeId;
-}
+    public Bike(String bikeId, String brand, double ratePerHour) {
+        this.bikeId = bikeId;
+        this.brand = brand;
+        this.ratePerHour = ratePerHour;
+        this.isAvailable = true;
+        this.underMaintenance = false;
+        this.condition = Condition.GOOD;
+    }
 
-public String getBrand() {
-    return brand;
-}
+    // ---------- Getters ----------
 
-public double getRatePerHour() {
-    return ratePerHour;
-}
+    public String getBikeId() {
+        return bikeId;
+    }
 
-public boolean isAvailable() {
-    return isAvailable;
-}
+    public String getBrand() {
+        return brand;
+    }
 
-public void setAvailable(boolean available) {
-    this.isAvailable = available;
-}
+    public double getRatePerHour() {
+        return ratePerHour;
+    }
 
-public abstract double calculateRentalCost(int hours);
+    public boolean isAvailable() {
+        return isAvailable;
+    }
 
-public void displayInfo() {
-    System.out.println("ID: " + bikeId + " | Brand: " + brand + " | Rate/hr: " + ratePerHour + " | Available: " + isAvailable);
-}
+    public boolean isUnderMaintenance() {
+        return underMaintenance;
+    }
+
+    public Condition getCondition() {
+        return condition;
+    }
+
+    // ---------- Setters ----------
+
+    public void setAvailable(boolean available) {
+        this.isAvailable = available;
+    }
+
+    public void setCondition(Condition condition) {
+        this.condition = condition;
+    }
+
+    // When flagged for maintenance, bike becomes unavailable automatically
+    public void setUnderMaintenance(boolean underMaintenance) {
+        this.underMaintenance = underMaintenance;
+        if (underMaintenance) {
+            this.isAvailable = false;
+        }
+    }
+
+    // ---------- Abstract Methods ----------
+
+    // Each subclass must provide its bike type name
+    public abstract String getType();
+
+    // Each subclass calculates rental cost differently
+    public abstract double calculateRentalCost(int hours);
+
+    // ---------- Display ----------
+
+    public void displayInfo() {
+        // Determine readable status
+        String status;
+        if (underMaintenance) {
+            status = "Under Maintenance";
+        } else if (isAvailable) {
+            status = "Available";
+        } else {
+            status = "Rented";
+        }
+
+        System.out.println("ID: " + bikeId
+                + " | Type: "      + getType()
+                + " | Brand: "     + brand
+                + " | Rate/hr: PHP " + ratePerHour
+                + " | Status: "    + status
+                + " | Condition: " + condition);
+    }
 }
