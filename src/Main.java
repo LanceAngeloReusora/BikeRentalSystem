@@ -84,9 +84,10 @@ public class Main {
             System.out.println("3. Rent Bike");
             System.out.println("4. Return Bike");
             System.out.println("5. View Active Rentals");
-            System.out.println("6. Exit");
+            System.out.println("6. View Rental History");
+            System.out.println("7. Exit");
 
-            int choice = getMenuChoice(1, 6);
+            int choice = getMenuChoice(1, 7);
 
             switch (choice) {
 
@@ -216,6 +217,11 @@ public class Main {
                     break;
 
                 case 6:
+                    String historyId = getStringInput("Enter Customer ID: ");
+                    service.displayRentalHistory(historyId);
+                    break;
+
+                case 7:
                     System.out.println("Thank you for using the system!");
                     return;
             }
