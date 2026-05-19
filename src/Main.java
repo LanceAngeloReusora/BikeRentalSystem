@@ -1,35 +1,35 @@
-import java.util.Scanner;
 import java.time.LocalDateTime;
+import java.util.Scanner;
 
 public class Main {
 
     static Scanner sc = new Scanner(System.in);
 
-    // ==================== INPUT HELPERS ====================
-
-    // Keeps asking until user enters a valid positive number
     public static int getIntInput(String prompt) {
         while (true) {
             System.out.print(prompt);
             String input = sc.nextLine().trim();
+
             try {
                 int value = Integer.parseInt(input);
+
                 if (value <= 0) {
                     System.out.println("  [!] Please enter a positive number.\n");
                 } else {
                     return value;
                 }
+
             } catch (NumberFormatException e) {
                 System.out.println("  [!] Invalid input. Numbers only please.\n");
             }
         }
     }
 
-    // Keeps asking until user enters a non-empty string
     public static String getStringInput(String prompt) {
         while (true) {
             System.out.print(prompt);
             String input = sc.nextLine().trim();
+
             if (input.isEmpty()) {
                 System.out.println("  [!] This field cannot be empty.\n");
             } else {
@@ -38,26 +38,28 @@ public class Main {
         }
     }
 
-    // Keeps asking until user picks a valid menu number
     public static int getMenuChoice(int min, int max) {
         while (true) {
             System.out.print("Choose option: ");
             String input = sc.nextLine().trim();
+
             try {
                 int value = Integer.parseInt(input);
+
                 if (value < min || value > max) {
                     System.out.println("  [!] Please choose between " + min + " and " + max + ".\n");
                 } else {
                     return value;
                 }
+
             } catch (NumberFormatException e) {
                 System.out.println("  [!] Invalid input. Numbers only please.\n");
             }
         }
     }
 
-    // Asks staff to select a payment method
     public static Payment.Method getPaymentMethod() {
+
         System.out.println("  Select Payment Method:");
         System.out.println("    1. Cash");
         System.out.println("    2. GCash");
@@ -66,44 +68,62 @@ public class Main {
         System.out.println("    5. Bank Transfer");
 
         while (true) {
+
             System.out.print("  Choose (1-5): ");
             String input = sc.nextLine().trim();
+
             switch (input) {
-                case "1": return Payment.Method.CASH;
-                case "2": return Payment.Method.GCASH;
-                case "3": return Payment.Method.MAYA;
-                case "4": return Payment.Method.CREDIT_DEBIT;
-                case "5": return Payment.Method.BANK_TRANSFER;
+
+                case "1":
+                    return Payment.Method.CASH;
+
+                case "2":
+                    return Payment.Method.GCASH;
+
+                case "3":
+                    return Payment.Method.MAYA;
+
+                case "4":
+                    return Payment.Method.CREDIT_DEBIT;
+
+                case "5":
+                    return Payment.Method.BANK_TRANSFER;
+
                 default:
                     System.out.println("  [!] Please enter a number from 1 to 5.\n");
             }
         }
     }
 
-    // Asks staff to report the bike condition on return
     public static Bike.Condition getBikeCondition() {
+
         System.out.println("  Bike Condition:");
         System.out.println("    1. Good");
         System.out.println("    2. Damaged");
 
         while (true) {
+
             System.out.print("  Select condition (1-2): ");
             String input = sc.nextLine().trim();
+
             switch (input) {
-                case "1": return Bike.Condition.GOOD;
-                case "2": return Bike.Condition.DAMAGED;
+
+                case "1":
+                    return Bike.Condition.GOOD;
+
+                case "2":
+                    return Bike.Condition.DAMAGED;
+
                 default:
                     System.out.println("  [!] Please enter 1 or 2 only.\n");
             }
         }
     }
 
-    // ==================== MAIN ====================
-
     public static void main(String[] args) {
+
         BikeRentalService service = new BikeRentalService();
 
-        // Pre-load example bikes
         service.addBike(new MountainBike("M1", "Trek"));
         service.addBike(new BMXBike("B1", "Haro"));
         service.addBike(new RoadBike("R1", "Giant"));
@@ -111,6 +131,7 @@ public class Main {
         service.addBike(new JapaneseBike("J1", "Bridgestone"));
 
         while (true) {
+
             System.out.println("===== BIKE RENTAL SYSTEM =====");
             System.out.println("1.  Register Customer");
             System.out.println("2.  View Available Bikes");
@@ -128,8 +149,8 @@ public class Main {
 
             switch (choice) {
 
-                // -------------------- REGISTER CUSTOMER --------------------
                 case 1:
+
                     String cid = getStringInput("Enter Customer ID: ");
 
                     if (service.findCustomer(cid) != null) {
@@ -139,27 +160,45 @@ public class Main {
 
                     String name = getStringInput("Enter Name: ");
 
-                    // Contact must be digits only
                     String contact;
+
                     while (true) {
+
                         contact = getStringInput("Enter Contact Number: ");
+
                         if (contact.matches("\\d+")) {
                             break;
                         }
+
                         System.out.println("  [!] Contact must contain numbers only.\n");
                     }
 
-                    service.registerCustomer(new Customer(cid, name, contact));
+                    double discount = 0;
+
+                    System.out.print("Enter Promo Code (Press Enter to skip): ");
+                    String promo = sc.nextLine().trim();
+
+                    if (promo.equalsIgnoreCase("WELCOME")) {
+                        discount = 0.05;
+                        System.out.println("  [✓] Promo code applied! 5% discount granted.");
+                    } else if (!promo.isEmpty()) {
+                        System.out.println("  [!] Invalid promo code. No discount applied.");
+                    }
+
+                    service.registerCustomer(
+                            new Customer(cid, name, contact, discount)
+                    );
+
                     System.out.println("  [✓] Customer registered successfully!\n");
+
                     break;
 
-                // -------------------- VIEW AVAILABLE BIKES --------------------
                 case 2:
                     service.displayAvailableBikes();
                     break;
 
-                // -------------------- RENT BIKE --------------------
                 case 3:
+
                     String customerId = getStringInput("Enter Customer ID: ");
                     Customer customer = service.findCustomer(customerId);
 
@@ -178,7 +217,6 @@ public class Main {
 
                     int hours = getIntInput("Enter Hours to Rent: ");
 
-                    // Rental ID is a combination of customer ID and bike ID
                     String rentalId = "R" + customerId + "-" + bikeId;
 
                     if (service.findActiveRental(rentalId) != null) {
@@ -187,17 +225,25 @@ public class Main {
                     }
 
                     Rental rental = new Rental(rentalId, customer, bike, hours);
+
                     service.addRental(rental);
 
                     Receipt.printReceipt(rental);
 
                     Payment.Method rentMethod = getPaymentMethod();
-                    Payment rentPayment = new Payment("P-" + rentalId, rental.getTotalCost(), rentMethod);
+
+                    Payment rentPayment = new Payment(
+                            "P-" + rentalId,
+                            rental.getTotalCost(),
+                            rentMethod
+                    );
+
                     rentPayment.processPayment();
+
                     break;
 
-                // -------------------- RETURN BIKE --------------------
                 case 4:
+
                     String rid = getStringInput("Enter Rental ID to return: ");
                     Rental activeRental = service.findActiveRental(rid);
 
@@ -208,13 +254,19 @@ public class Main {
 
                     System.out.println("  Booked Hours: " + activeRental.getBookedHours());
 
-                    // Actual hours must be at least equal to booked hours
                     int actualHours;
+
                     while (true) {
+
                         actualHours = getIntInput("Enter Actual Hours Used: ");
+
                         if (actualHours < activeRental.getBookedHours()) {
-                            System.out.println("  [!] Actual hours cannot be less than booked hours ("
-                                    + activeRental.getBookedHours() + ").\n");
+
+                            System.out.println(
+                                    "  [!] Actual hours cannot be less than booked hours ("
+                                            + activeRental.getBookedHours() + ").\n"
+                            );
+
                         } else {
                             break;
                         }
@@ -222,79 +274,137 @@ public class Main {
 
                     Bike.Condition condition = getBikeCondition();
 
-                    // Process the return - calculates late fee and damage penalty if needed
                     activeRental.returnBike(actualHours, condition);
 
-                    // Print return summary
                     System.out.println("\n===== RETURN SUMMARY =====");
+
                     System.out.println("Rental ID     : " + activeRental.getRentalId());
-                    System.out.println("Customer      : " + activeRental.getCustomer().getName());
-                    System.out.println("Bike          : " + activeRental.getBike().getBrand()
+
+                    System.out.println("Customer      : "
+                            + activeRental.getCustomer().getName());
+
+                    System.out.println("Bike          : "
+                            + activeRental.getBike().getBrand()
                             + " (" + activeRental.getBike().getBikeId() + ")");
-                    System.out.println("Booked Hours  : " + activeRental.getBookedHours());
+
+                    System.out.println("Booked Hours  : "
+                            + activeRental.getBookedHours());
+
                     System.out.println("Actual Hours  : " + actualHours);
+
                     System.out.println("Bike Condition: " + condition);
-                    System.out.println("Base Cost     : PHP " + activeRental.getBaseCost());
+
+                    System.out.println("Base Cost     : PHP "
+                            + activeRental.getBaseCost());
 
                     if (activeRental.getLateFee() > 0) {
-                        int extraHours = actualHours - activeRental.getBookedHours();
-                        System.out.println("Late Fee      : PHP " + activeRental.getLateFee()
-                                + " (" + extraHours + " extra hour/s at 1.5x rate)");
+
+                        int extraHours =
+                                actualHours - activeRental.getBookedHours();
+
+                        System.out.println("Late Fee      : PHP "
+                                + activeRental.getLateFee()
+                                + " (" + extraHours
+                                + " extra hour/s at 1.5x rate)");
                     }
 
                     if (activeRental.getDamagePenalty() > 0) {
-                        System.out.println("Damage Penalty: PHP " + activeRental.getDamagePenalty());
-                        System.out.println("  [!] Bike flagged for maintenance.");
+
+                        System.out.println("Damage Penalty: PHP "
+                                + activeRental.getDamagePenalty());
+
+                        System.out.println(
+                                "  [!] Bike flagged for maintenance."
+                        );
                     }
 
-                    System.out.println("Total Due     : PHP " + activeRental.getTotalCost());
+                    System.out.println("Total Due     : PHP "
+                            + activeRental.getTotalCost());
+
                     System.out.println("==========================\n");
 
-                    // Only ask for extra payment if there are additional charges
-                    double extraCharges = activeRental.getLateFee() + activeRental.getDamagePenalty();
+                    double extraCharges =
+                            activeRental.getLateFee()
+                                    + activeRental.getDamagePenalty();
+
                     if (extraCharges > 0) {
-                        System.out.println("  Additional charges: PHP " + extraCharges);
-                        Payment.Method extraMethod = getPaymentMethod();
-                        Payment extraPayment = new Payment("EP-" + activeRental.getRentalId(), extraCharges, extraMethod);
+
+                        System.out.println(
+                                "  Additional charges: PHP "
+                                        + extraCharges
+                        );
+
+                        Payment.Method extraMethod =
+                                getPaymentMethod();
+
+                        Payment extraPayment = new Payment(
+                                "EP-" + activeRental.getRentalId(),
+                                extraCharges,
+                                extraMethod
+                        );
+
                         extraPayment.processPayment();
+
                     } else {
-                        System.out.println("  [✓] Bike returned successfully. No extra charges.\n");
+
+                        System.out.println(
+                                "  [✓] Bike returned successfully. No extra charges.\n"
+                        );
                     }
+
                     break;
 
-                // -------------------- VIEW ACTIVE RENTALS --------------------
                 case 5:
                     service.displayActiveRentals();
                     break;
 
-                // -------------------- VIEW RENTAL HISTORY --------------------
                 case 6:
-                    String historyId = getStringInput("Enter Customer ID: ");
+
+                    String historyId =
+                            getStringInput("Enter Customer ID: ");
+
                     service.displayRentalHistory(historyId);
+
                     break;
 
-                // -------------------- MAKE RESERVATION --------------------
                 case 7:
-                    String resCustId = getStringInput("Enter Customer ID: ");
-                    Customer resCust = service.findCustomer(resCustId);
+
+                    String resCustId =
+                            getStringInput("Enter Customer ID: ");
+
+                    Customer resCust =
+                            service.findCustomer(resCustId);
 
                     if (resCust == null) {
-                        System.out.println("  [!] Customer not found. Please register first.\n");
+
+                        System.out.println(
+                                "  [!] Customer not found. Please register first.\n"
+                        );
+
                         break;
                     }
 
-                    String resBikeId = getStringInput("Enter Bike ID: ");
-                    Bike resBike = service.findBike(resBikeId);
+                    String resBikeId =
+                            getStringInput("Enter Bike ID: ");
+
+                    Bike resBike =
+                            service.findBike(resBikeId);
 
                     if (resBike == null) {
-                        System.out.println("  [!] Bike not available or does not exist.\n");
+
+                        System.out.println(
+                                "  [!] Bike not available or does not exist.\n"
+                        );
+
                         break;
                     }
 
-                    int resHours = getIntInput("Enter Reserved Hours: ");
+                    int resHours =
+                            getIntInput("Enter Reserved Hours: ");
 
-                    // Use current date and time as the reservation time
-                    String reservationId = "RES" + resCustId + "-" + resBikeId;
+                    String reservationId =
+                            "RES" + resCustId + "-" + resBikeId;
+
                     Reservation reservation = new Reservation(
                             reservationId,
                             resCust,
@@ -304,59 +414,88 @@ public class Main {
                     );
 
                     service.addReservation(reservation);
+
                     reservation.displayReservation();
-                    System.out.println("  [✓] Reservation made successfully!\n");
+
+                    System.out.println(
+                            "  [✓] Reservation made successfully!\n"
+                    );
+
                     break;
 
-                // -------------------- CANCEL RESERVATION --------------------
                 case 8:
-                    String cancelId = getStringInput("Enter Reservation ID to cancel: ");
-                    Reservation toCancel = service.findActiveReservation(cancelId);
+
+                    String cancelId =
+                            getStringInput("Enter Reservation ID to cancel: ");
+
+                    Reservation toCancel =
+                            service.findActiveReservation(cancelId);
 
                     if (toCancel == null) {
-                        System.out.println("  [!] No active reservation found with that ID.\n");
+
+                        System.out.println(
+                                "  [!] No active reservation found with that ID.\n"
+                        );
+
                         break;
                     }
 
                     toCancel.cancelReservation();
-                    System.out.println("  [✓] Reservation " + cancelId + " has been cancelled.\n");
+
+                    System.out.println(
+                            "  [✓] Reservation " + cancelId + " has been cancelled.\n"
+                    );
+
                     break;
 
-                // -------------------- CONFIRM RESERVATION --------------------
                 case 9:
-                    String confirmId = getStringInput("Enter Reservation ID to confirm: ");
-                    Reservation toConfirm = service.findActiveReservation(confirmId);
+
+                    String confirmId =
+                            getStringInput("Enter Reservation ID to confirm: ");
+
+                    Reservation toConfirm =
+                            service.findActiveReservation(confirmId);
 
                     if (toConfirm == null) {
-                        System.out.println("  [!] No active reservation found with that ID.\n");
+
+                        System.out.println(
+                                "  [!] No active reservation found with that ID.\n"
+                        );
+
                         break;
                     }
 
-                    // Convert reservation into a rental
-                    Rental confirmedRental = toConfirm.confirmReservation();
+                    Rental confirmedRental =
+                            toConfirm.confirmReservation();
 
                     if (confirmedRental != null) {
+
                         service.addRental(confirmedRental);
+
                         Receipt.printReceipt(confirmedRental);
 
-                        Payment.Method confirmMethod = getPaymentMethod();
+                        Payment.Method confirmMethod =
+                                getPaymentMethod();
+
                         Payment confirmPayment = new Payment(
                                 "P-" + confirmedRental.getRentalId(),
                                 confirmedRental.getTotalCost(),
                                 confirmMethod
                         );
+
                         confirmPayment.processPayment();
                     }
+
                     break;
 
-                // -------------------- VIEW ACTIVE RESERVATIONS --------------------
                 case 10:
                     service.displayActiveReservations();
                     break;
 
-                // -------------------- EXIT --------------------
                 case 11:
-                    System.out.println("Thank you for using the Bike Rental System!");
+                    System.out.println(
+                            "Thank you for using the Bike Rental System!"
+                    );
                     return;
             }
         }

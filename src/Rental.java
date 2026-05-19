@@ -1,6 +1,5 @@
 public class Rental {
 
-    // Fixed penalty fee for returning a damaged bike
     private static final double DAMAGE_PENALTY = 500.00;
 
     private String rentalId;
@@ -20,17 +19,17 @@ public class Rental {
         this.bike = bike;
         this.bookedHours = bookedHours;
         this.actualHours = bookedHours;
-        this.baseCost = bike.calculateRentalCost(bookedHours);
+
+        double originalCost = bike.calculateRentalCost(bookedHours);
+        this.baseCost = originalCost - (originalCost * customer.getDiscountRate());
+
         this.lateFee = 0;
         this.damagePenalty = 0;
         this.totalCost = baseCost;
         this.isReturned = false;
 
-        // Mark bike as unavailable when rented
         bike.setAvailable(false);
     }
-
-    // ---------- Getters ----------
 
     public String getRentalId() {
         return rentalId;
@@ -68,34 +67,26 @@ public class Rental {
         return isReturned;
     }
 
-    // ---------- Return Logic ----------
-
     public void returnBike(int actualHours, Bike.Condition condition) {
         this.actualHours = actualHours;
         this.isReturned = true;
 
-        // Update the bike's condition
         bike.setCondition(condition);
 
-        // Charge 1.5x rate for every extra hour beyond the booked hours
         if (actualHours > bookedHours) {
             int extraHours = actualHours - bookedHours;
             this.lateFee = bike.getRatePerHour() * extraHours * 1.5;
         }
 
-        // Add damage penalty and flag bike for maintenance if damaged
         if (condition == Bike.Condition.DAMAGED) {
             this.damagePenalty = DAMAGE_PENALTY;
-            bike.setUnderMaintenance(true);  // bike becomes unavailable until fixed
+            bike.setUnderMaintenance(true);
         } else {
-            bike.setAvailable(true);  // bike goes back to available if in good condition
+            bike.setAvailable(true);
         }
 
-        // Final total = base cost + late fee + damage penalty
         this.totalCost = baseCost + lateFee + damagePenalty;
     }
-
-    // ---------- Display ----------
 
     public void displayRental() {
         System.out.println("Rental ID     : " + rentalId);
@@ -108,6 +99,7 @@ public class Rental {
         if (lateFee > 0) {
             System.out.println("Late Fee      : PHP " + lateFee);
         }
+
         if (damagePenalty > 0) {
             System.out.println("Damage Penalty: PHP " + damagePenalty);
         }
