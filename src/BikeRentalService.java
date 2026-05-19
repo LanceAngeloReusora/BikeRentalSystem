@@ -6,10 +6,10 @@ public class BikeRentalService {
     private ArrayList<Customer> customers = new ArrayList<>();
     private ArrayList<Rental> rentals = new ArrayList<>();
     private ArrayList<Reservation> reservations = new ArrayList<>();
+    private ArrayList<Helmet> helmets = new ArrayList<>();
 
     // ---------- Add / Register ----------
 
-    // Returns false and warns if bike ID already exists
     public boolean addBike(Bike bike) {
         if (findBikeById(bike.getBikeId()) != null) {
             System.out.println("  [!] Bike ID \"" + bike.getBikeId() + "\" already exists. Skipping.");
@@ -19,7 +19,6 @@ public class BikeRentalService {
         return true;
     }
 
-    // Returns false and warns if customer ID already exists
     public boolean registerCustomer(Customer customer) {
         if (findCustomer(customer.getCustomerId()) != null) {
             System.out.println("  [!] Customer ID \"" + customer.getCustomerId() + "\" already exists.");
@@ -37,6 +36,10 @@ public class BikeRentalService {
         reservations.add(reservation);
     }
 
+    public void addHelmet(Helmet helmet) {
+        helmets.add(helmet);
+    }
+
     // ---------- Display ----------
 
     public void displayAvailableBikes() {
@@ -50,6 +53,21 @@ public class BikeRentalService {
         }
         if (!found) {
             System.out.println("  No bikes available at the moment.");
+        }
+        System.out.println();
+    }
+
+    public void displayAvailableHelmets() {
+        System.out.println("\n===== AVAILABLE HELMETS =====");
+        boolean found = false;
+        for (Helmet helmet : helmets) {
+            if (helmet.isAvailable()) {
+                helmet.displayInfo();
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("  No helmets available at the moment.");
         }
         System.out.println();
     }
@@ -109,6 +127,10 @@ public class BikeRentalService {
                 System.out.println("Bike      : " + rental.getBike().getBrand()
                         + " (" + rental.getBike().getBikeId() + ")"
                         + " - " + rental.getBike().getType());
+                if (rental.getHelmet() != null) {
+                    System.out.println("Helmet    : " + rental.getHelmet().getHelmetId()
+                            + " | Fee: PHP " + rental.getHelmetFee());
+                }
                 System.out.println("Hours     : " + rental.getBookedHours());
                 System.out.println("Cost      : PHP " + rental.getTotalCost());
                 System.out.println("Status    : " + (rental.isReturned() ? "Returned" : "Active"));
@@ -137,52 +159,44 @@ public class BikeRentalService {
 
     // ---------- Search ----------
 
-    // Finds a customer by ID
     public Customer findCustomer(String id) {
         for (Customer c : customers) {
-            if (c.getCustomerId().equals(id)) {
-                return c;
-            }
+            if (c.getCustomerId().equals(id)) return c;
         }
         return null;
     }
 
-    // Finds any bike by ID regardless of availability (used for duplicate checks)
     public Bike findBikeById(String id) {
         for (Bike b : bikes) {
-            if (b.getBikeId().equals(id)) {
-                return b;
-            }
+            if (b.getBikeId().equals(id)) return b;
         }
         return null;
     }
 
-    // Finds an available bike by ID (used when renting or reserving)
     public Bike findBike(String id) {
         for (Bike b : bikes) {
-            if (b.getBikeId().equals(id) && b.isAvailable()) {
-                return b;
-            }
+            if (b.getBikeId().equals(id) && b.isAvailable()) return b;
         }
         return null;
     }
 
-    // Finds an active (not yet returned) rental by rental ID
     public Rental findActiveRental(String rentalId) {
         for (Rental r : rentals) {
-            if (r.getRentalId().equals(rentalId) && !r.isReturned()) {
-                return r;
-            }
+            if (r.getRentalId().equals(rentalId) && !r.isReturned()) return r;
         }
         return null;
     }
 
-    // Finds an active reservation by reservation ID
     public Reservation findActiveReservation(String reservationId) {
         for (Reservation r : reservations) {
-            if (r.getReservationId().equals(reservationId) && r.isActive()) {
-                return r;
-            }
+            if (r.getReservationId().equals(reservationId) && r.isActive()) return r;
+        }
+        return null;
+    }
+
+    public Helmet findAvailableHelmet(String helmetId) {
+        for (Helmet h : helmets) {
+            if (h.getHelmetId().equals(helmetId) && h.isAvailable()) return h;
         }
         return null;
     }

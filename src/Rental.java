@@ -5,67 +5,57 @@ public class Rental {
     private String rentalId;
     private Customer customer;
     private Bike bike;
+    private Helmet helmet;           // nullable — optional
     private int bookedHours;
     private int actualHours;
     private double baseCost;
+    private double helmetFee;
     private double lateFee;
     private double damagePenalty;
     private double totalCost;
     private boolean isReturned;
 
+    // Without helmet
     public Rental(String rentalId, Customer customer, Bike bike, int bookedHours) {
+        this(rentalId, customer, bike, bookedHours, null);
+    }
+
+    // With optional helmet
+    public Rental(String rentalId, Customer customer, Bike bike, int bookedHours, Helmet helmet) {
         this.rentalId = rentalId;
         this.customer = customer;
         this.bike = bike;
+        this.helmet = helmet;
         this.bookedHours = bookedHours;
         this.actualHours = bookedHours;
 
         double originalCost = bike.calculateRentalCost(bookedHours);
         this.baseCost = originalCost - (originalCost * customer.getDiscountRate());
 
+        this.helmetFee = (helmet != null) ? Helmet.getHelmetFee() : 0;
         this.lateFee = 0;
         this.damagePenalty = 0;
-        this.totalCost = baseCost;
+        this.totalCost = baseCost + helmetFee;
         this.isReturned = false;
 
         bike.setAvailable(false);
+
+        if (helmet != null) {
+            helmet.setAvailable(false);
+        }
     }
 
-    public String getRentalId() {
-        return rentalId;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public Bike getBike() {
-        return bike;
-    }
-
-    public int getBookedHours() {
-        return bookedHours;
-    }
-
-    public double getBaseCost() {
-        return baseCost;
-    }
-
-    public double getLateFee() {
-        return lateFee;
-    }
-
-    public double getDamagePenalty() {
-        return damagePenalty;
-    }
-
-    public double getTotalCost() {
-        return totalCost;
-    }
-
-    public boolean isReturned() {
-        return isReturned;
-    }
+    public String getRentalId()       { return rentalId; }
+    public Customer getCustomer()     { return customer; }
+    public Bike getBike()             { return bike; }
+    public Helmet getHelmet()         { return helmet; }
+    public int getBookedHours()       { return bookedHours; }
+    public double getBaseCost()       { return baseCost; }
+    public double getHelmetFee()      { return helmetFee; }
+    public double getLateFee()        { return lateFee; }
+    public double getDamagePenalty()  { return damagePenalty; }
+    public double getTotalCost()      { return totalCost; }
+    public boolean isReturned()       { return isReturned; }
 
     public void returnBike(int actualHours, Bike.Condition condition) {
         this.actualHours = actualHours;
@@ -85,16 +75,34 @@ public class Rental {
             bike.setAvailable(true);
         }
 
-        this.totalCost = baseCost + lateFee + damagePenalty;
+        // Return helmet when bike is returned
+        if (helmet != null) {
+            helmet.setAvailable(true);
+        }
+
+        this.totalCost = baseCost + helmetFee + lateFee + damagePenalty;
     }
 
     public void displayRental() {
         System.out.println("Rental ID     : " + rentalId);
         customer.displayCustomer();
         bike.displayInfo();
+
+        if (helmet != null) {
+            System.out.println("Helmet        : " + helmet.getHelmetId()
+                    + " (Size: " + helmet.getSize()
+                    + ") | Fee: PHP " + helmetFee);
+        } else {
+            System.out.println("Helmet        : None");
+        }
+
         System.out.println("Booked Hours  : " + bookedHours);
         System.out.println("Actual Hours  : " + actualHours);
         System.out.println("Base Cost     : PHP " + baseCost);
+
+        if (helmetFee > 0) {
+            System.out.println("Helmet Fee    : PHP " + helmetFee);
+        }
 
         if (lateFee > 0) {
             System.out.println("Late Fee      : PHP " + lateFee);

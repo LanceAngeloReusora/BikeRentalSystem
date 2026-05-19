@@ -120,6 +120,37 @@ public class Main {
         }
     }
 
+    // ── HELMET ADDED #1 ───────────────────────────────────────────
+    // New helper method placed here alongside the other helper methods
+    public static Helmet askForHelmet(BikeRentalService service) {
+        System.out.print("  Add a helmet? (yes/no): ");
+        String answer = sc.nextLine().trim();
+
+        if (!answer.equalsIgnoreCase("yes")) {
+            return null;
+        }
+
+        service.displayAvailableHelmets();
+
+        System.out.print("  Enter Helmet ID (or press Enter to skip): ");
+        String helmetId = sc.nextLine().trim();
+
+        if (helmetId.isEmpty()) {
+            return null;
+        }
+
+        Helmet helmet = service.findAvailableHelmet(helmetId);
+
+        if (helmet == null) {
+            System.out.println("  [!] Helmet not found or unavailable. Continuing without helmet.\n");
+        } else {
+            System.out.println("  [✓] Helmet added! Fee: PHP " + Helmet.getHelmetFee());
+        }
+
+        return helmet;
+    }
+    // ──────────────────────────────────────────────────────────────
+
     public static void main(String[] args) {
 
         BikeRentalService service = new BikeRentalService();
@@ -129,6 +160,14 @@ public class Main {
         service.addBike(new RoadBike("R1", "Giant"));
         service.addBike(new ElectricBike("E1", "Xiaomi"));
         service.addBike(new JapaneseBike("J1", "Bridgestone"));
+
+        // ── HELMET ADDED #2 ───────────────────────────────────────
+        // Helmets added to service right below the bikes
+        service.addHelmet(new Helmet("H1", Helmet.Size.SMALL));
+        service.addHelmet(new Helmet("H2", Helmet.Size.MEDIUM));
+        service.addHelmet(new Helmet("H3", Helmet.Size.LARGE));
+        service.addHelmet(new Helmet("H4", Helmet.Size.MEDIUM));
+        // ──────────────────────────────────────────────────────────
 
         while (true) {
 
@@ -143,9 +182,10 @@ public class Main {
             System.out.println("8.  Cancel Reservation");
             System.out.println("9.  Confirm Reservation");
             System.out.println("10. View Active Reservations");
-            System.out.println("11. Exit");
+            System.out.println("11. View Available Helmets");  // ── HELMET ADDED #3
+            System.out.println("12. Exit");                    // ── was 11, now 12
 
-            int choice = getMenuChoice(1, 11);
+            int choice = getMenuChoice(1, 12);                 // ── HELMET ADDED #4: 11 → 12
 
             switch (choice) {
 
@@ -224,7 +264,12 @@ public class Main {
                         break;
                     }
 
-                    Rental rental = new Rental(rentalId, customer, bike, hours);
+                    // ── HELMET ADDED #5 ───────────────────────────────────
+                    // Helmet prompt inserted right before creating the Rental
+                    Helmet helmet = askForHelmet(service);
+                    Rental rental = new Rental(rentalId, customer, bike, hours, helmet);
+                    // ── was: Rental rental = new Rental(rentalId, customer, bike, hours);
+                    // ─────────────────────────────────────────────────────
 
                     service.addRental(rental);
 
@@ -287,6 +332,15 @@ public class Main {
                             + activeRental.getBike().getBrand()
                             + " (" + activeRental.getBike().getBikeId() + ")");
 
+                    // ── HELMET ADDED #6 ───────────────────────────────────
+                    // Shows helmet return info in the return summary
+                    if (activeRental.getHelmet() != null) {
+                        System.out.println("Helmet        : "
+                                + activeRental.getHelmet().getHelmetId()
+                                + " returned.");
+                    }
+                    // ─────────────────────────────────────────────────────
+
                     System.out.println("Booked Hours  : "
                             + activeRental.getBookedHours());
 
@@ -296,6 +350,14 @@ public class Main {
 
                     System.out.println("Base Cost     : PHP "
                             + activeRental.getBaseCost());
+
+                    // ── HELMET ADDED #7 ───────────────────────────────────
+                    // Shows helmet fee line in the return summary
+                    if (activeRental.getHelmetFee() > 0) {
+                        System.out.println("Helmet Fee    : PHP "
+                                + activeRental.getHelmetFee());
+                    }
+                    // ─────────────────────────────────────────────────────
 
                     if (activeRental.getLateFee() > 0) {
 
@@ -492,11 +554,18 @@ public class Main {
                     service.displayActiveReservations();
                     break;
 
+                // ── HELMET ADDED #8 ───────────────────────────────────────
+                // New case 11 for viewing helmets, Exit bumped to case 12
                 case 11:
+                    service.displayAvailableHelmets();
+                    break;
+
+                case 12:
                     System.out.println(
                             "Thank you for using the Bike Rental System!"
                     );
                     return;
+                // ─────────────────────────────────────────────────────────
             }
         }
     }
