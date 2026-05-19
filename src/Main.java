@@ -1,5 +1,5 @@
 import java.util.Scanner;
-
+import java.time.LocalDateTime;
 
 public class Main {
 
@@ -112,15 +112,19 @@ public class Main {
 
         while (true) {
             System.out.println("===== BIKE RENTAL SYSTEM =====");
-            System.out.println("1. Register Customer");
-            System.out.println("2. View Available Bikes");
-            System.out.println("3. Rent Bike");
-            System.out.println("4. Return Bike");
-            System.out.println("5. View Active Rentals");
-            System.out.println("6. View Rental History");
-            System.out.println("7. Exit");
+            System.out.println("1.  Register Customer");
+            System.out.println("2.  View Available Bikes");
+            System.out.println("3.  Rent Bike");
+            System.out.println("4.  Return Bike");
+            System.out.println("5.  View Active Rentals");
+            System.out.println("6.  View Rental History");
+            System.out.println("7.  Make Reservation");
+            System.out.println("8.  Cancel Reservation");
+            System.out.println("9.  Confirm Reservation");
+            System.out.println("10. View Active Reservations");
+            System.out.println("11. Exit");
 
-            int choice = getMenuChoice(1, 7);
+            int choice = getMenuChoice(1, 11);
 
             switch (choice) {
 
@@ -269,8 +273,89 @@ public class Main {
                     service.displayRentalHistory(historyId);
                     break;
 
-                // -------------------- EXIT --------------------
+                // -------------------- MAKE RESERVATION --------------------
                 case 7:
+                    String resCustId = getStringInput("Enter Customer ID: ");
+                    Customer resCust = service.findCustomer(resCustId);
+
+                    if (resCust == null) {
+                        System.out.println("  [!] Customer not found. Please register first.\n");
+                        break;
+                    }
+
+                    String resBikeId = getStringInput("Enter Bike ID: ");
+                    Bike resBike = service.findBike(resBikeId);
+
+                    if (resBike == null) {
+                        System.out.println("  [!] Bike not available or does not exist.\n");
+                        break;
+                    }
+
+                    int resHours = getIntInput("Enter Reserved Hours: ");
+
+                    // Use current date and time as the reservation time
+                    String reservationId = "RES" + resCustId + "-" + resBikeId;
+                    Reservation reservation = new Reservation(
+                            reservationId,
+                            resCust,
+                            resBike,
+                            LocalDateTime.now(),
+                            resHours
+                    );
+
+                    service.addReservation(reservation);
+                    reservation.displayReservation();
+                    System.out.println("  [✓] Reservation made successfully!\n");
+                    break;
+
+                // -------------------- CANCEL RESERVATION --------------------
+                case 8:
+                    String cancelId = getStringInput("Enter Reservation ID to cancel: ");
+                    Reservation toCancel = service.findActiveReservation(cancelId);
+
+                    if (toCancel == null) {
+                        System.out.println("  [!] No active reservation found with that ID.\n");
+                        break;
+                    }
+
+                    toCancel.cancelReservation();
+                    System.out.println("  [✓] Reservation " + cancelId + " has been cancelled.\n");
+                    break;
+
+                // -------------------- CONFIRM RESERVATION --------------------
+                case 9:
+                    String confirmId = getStringInput("Enter Reservation ID to confirm: ");
+                    Reservation toConfirm = service.findActiveReservation(confirmId);
+
+                    if (toConfirm == null) {
+                        System.out.println("  [!] No active reservation found with that ID.\n");
+                        break;
+                    }
+
+                    // Convert reservation into a rental
+                    Rental confirmedRental = toConfirm.confirmReservation();
+
+                    if (confirmedRental != null) {
+                        service.addRental(confirmedRental);
+                        Receipt.printReceipt(confirmedRental);
+
+                        Payment.Method confirmMethod = getPaymentMethod();
+                        Payment confirmPayment = new Payment(
+                                "P-" + confirmedRental.getRentalId(),
+                                confirmedRental.getTotalCost(),
+                                confirmMethod
+                        );
+                        confirmPayment.processPayment();
+                    }
+                    break;
+
+                // -------------------- VIEW ACTIVE RESERVATIONS --------------------
+                case 10:
+                    service.displayActiveReservations();
+                    break;
+
+                // -------------------- EXIT --------------------
+                case 11:
                     System.out.println("Thank you for using the Bike Rental System!");
                     return;
             }

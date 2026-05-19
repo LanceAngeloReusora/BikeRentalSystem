@@ -5,18 +5,39 @@ public class BikeRentalService {
     private ArrayList<Bike> bikes = new ArrayList<>();
     private ArrayList<Customer> customers = new ArrayList<>();
     private ArrayList<Rental> rentals = new ArrayList<>();
+    private ArrayList<Reservation> reservations = new ArrayList<>();
 
-    public void addBike(Bike bike) {
+    // ---------- Add / Register ----------
+
+    // Returns false and warns if bike ID already exists
+    public boolean addBike(Bike bike) {
+        if (findBikeById(bike.getBikeId()) != null) {
+            System.out.println("  [!] Bike ID \"" + bike.getBikeId() + "\" already exists. Skipping.");
+            return false;
+        }
         bikes.add(bike);
+        return true;
     }
 
-    public void registerCustomer(Customer customer) {
+    // Returns false and warns if customer ID already exists
+    public boolean registerCustomer(Customer customer) {
+        if (findCustomer(customer.getCustomerId()) != null) {
+            System.out.println("  [!] Customer ID \"" + customer.getCustomerId() + "\" already exists.");
+            return false;
+        }
         customers.add(customer);
+        return true;
     }
 
     public void addRental(Rental rental) {
         rentals.add(rental);
     }
+
+    public void addReservation(Reservation reservation) {
+        reservations.add(reservation);
+    }
+
+    // ---------- Display ----------
 
     public void displayAvailableBikes() {
         System.out.println("\n===== AVAILABLE BIKES =====");
@@ -28,7 +49,7 @@ public class BikeRentalService {
             }
         }
         if (!found) {
-            System.out.println("No bikes available at the moment.");
+            System.out.println("  No bikes available at the moment.");
         }
         System.out.println();
     }
@@ -44,7 +65,22 @@ public class BikeRentalService {
             }
         }
         if (!found) {
-            System.out.println("No active rentals.");
+            System.out.println("  No active rentals.");
+        }
+        System.out.println();
+    }
+
+    public void displayActiveReservations() {
+        System.out.println("\n===== ACTIVE RESERVATIONS =====");
+        boolean found = false;
+        for (Reservation reservation : reservations) {
+            if (reservation.isActive()) {
+                reservation.displayReservation();
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("  No active reservations.");
         }
         System.out.println();
     }
@@ -58,14 +94,14 @@ public class BikeRentalService {
         }
 
         System.out.println("\n===== RENTAL HISTORY =====");
-        System.out.println("Customer  : " + customer.getName());
-        System.out.println("ID        : " + customer.getCustomerId());
-        System.out.println("Contact   : " + customer.getContact());
+        System.out.println("Customer : " + customer.getName());
+        System.out.println("ID       : " + customer.getCustomerId());
+        System.out.println("Contact  : " + customer.getContact());
         System.out.println("--------------------------");
 
-        boolean found = false;
         int totalRentals = 0;
         double totalSpent = 0;
+        boolean found = false;
 
         for (Rental rental : rentals) {
             if (rental.getCustomer().getCustomerId().equals(customerId)) {
@@ -79,6 +115,9 @@ public class BikeRentalService {
                 if (rental.getLateFee() > 0) {
                     System.out.println("Late Fee  : PHP " + rental.getLateFee());
                 }
+                if (rental.getDamagePenalty() > 0) {
+                    System.out.println("Damage Fee: PHP " + rental.getDamagePenalty());
+                }
                 System.out.println("--------------------------");
                 totalRentals++;
                 totalSpent += rental.getTotalCost();
@@ -87,23 +126,18 @@ public class BikeRentalService {
         }
 
         if (!found) {
-            System.out.println("No rental records found for this customer.");
+            System.out.println("  No rental records found for this customer.");
         } else {
             System.out.println("Total Rentals : " + totalRentals);
             System.out.println("Total Spent   : PHP " + totalSpent);
         }
+
         System.out.println("==========================\n");
     }
 
-    public Rental findActiveRental(String rentalId) {
-        for (Rental rental : rentals) {
-            if (rental.getRentalId().equals(rentalId) && !rental.isReturned()) {
-                return rental;
-            }
-        }
-        return null;
-    }
+    // ---------- Search ----------
 
+    // Finds a customer by ID
     public Customer findCustomer(String id) {
         for (Customer c : customers) {
             if (c.getCustomerId().equals(id)) {
@@ -113,10 +147,41 @@ public class BikeRentalService {
         return null;
     }
 
+    // Finds any bike by ID regardless of availability (used for duplicate checks)
+    public Bike findBikeById(String id) {
+        for (Bike b : bikes) {
+            if (b.getBikeId().equals(id)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    // Finds an available bike by ID (used when renting or reserving)
     public Bike findBike(String id) {
         for (Bike b : bikes) {
             if (b.getBikeId().equals(id) && b.isAvailable()) {
                 return b;
+            }
+        }
+        return null;
+    }
+
+    // Finds an active (not yet returned) rental by rental ID
+    public Rental findActiveRental(String rentalId) {
+        for (Rental r : rentals) {
+            if (r.getRentalId().equals(rentalId) && !r.isReturned()) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    // Finds an active reservation by reservation ID
+    public Reservation findActiveReservation(String reservationId) {
+        for (Reservation r : reservations) {
+            if (r.getReservationId().equals(reservationId) && r.isActive()) {
+                return r;
             }
         }
         return null;
