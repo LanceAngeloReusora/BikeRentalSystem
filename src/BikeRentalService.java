@@ -37,6 +37,12 @@ public class BikeRentalService {
     }
 
     public void addHelmet(Helmet helmet) {
+        for (Helmet h : helmets) {
+            if (h.getHelmetId().equals(helmet.getHelmetId())) {
+                System.out.println("  [!] Helmet ID \"" + helmet.getHelmetId() + "\" already exists. Skipping.");
+                return;
+            }
+        }
         helmets.add(helmet);
     }
 
@@ -199,6 +205,13 @@ public class BikeRentalService {
             if (h.getHelmetId().equals(helmetId) && h.isAvailable()) return h;
         }
         return null;
+    }
+
+    public boolean hasAvailableHelmet() {
+        for (Helmet h : helmets) {
+            if (h.isAvailable()) return true;
+        }
+        return false;
     }
 
     // ---------- Maintenance ----------

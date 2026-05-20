@@ -132,6 +132,12 @@ public class Main {
 
         service.displayAvailableHelmets();
 
+        // Bug fix: exit early if no helmets are available at all
+        if (!service.hasAvailableHelmet()) {
+            System.out.println("  [!] No helmets available. Continuing without helmet.\n");
+            return null;
+        }
+
         System.out.print("  Enter Helmet ID (or press Enter to skip): ");
         String helmetId = sc.nextLine().trim();
 

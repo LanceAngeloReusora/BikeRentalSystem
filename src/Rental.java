@@ -59,7 +59,6 @@ public class Rental {
 
     public void returnBike(int actualHours, Bike.Condition condition) {
         this.actualHours = actualHours;
-        this.isReturned = true;
 
         bike.setCondition(condition);
 
@@ -81,6 +80,7 @@ public class Rental {
         }
 
         this.totalCost = baseCost + helmetFee + lateFee + damagePenalty;
+        this.isReturned = true;
     }
 
     public void displayRental() {

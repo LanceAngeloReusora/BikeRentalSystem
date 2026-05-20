@@ -26,7 +26,7 @@ public class Helmet {
     public void displayInfo() {
         System.out.println("Helmet ID : " + helmetId
                 + " | Size: " + size
-                + " | Fee: PHP " + HELMET_FEE
+                + String.format(" | Fee: PHP %.2f", HELMET_FEE)
                 + " | Status: " + (isAvailable ? "Available" : "In Use"));
     }
 }
