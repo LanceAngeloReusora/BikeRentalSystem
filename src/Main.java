@@ -151,6 +151,44 @@ public class Main {
     }
     // ──────────────────────────────────────────────────────────────
 
+
+    public static void maintenanceMenu(BikeRentalService service) {
+        while (true) {
+            System.out.println("\n===== BIKE MAINTENANCE MODE =====");
+            System.out.println("1. View Bikes Under Maintenance");
+            System.out.println("2. Flag Bike for Maintenance");
+            System.out.println("3. Clear Bike from Maintenance");
+            System.out.println("4. Back to Main Menu");
+
+            int choice = getMenuChoice(1, 4);
+
+            switch (choice) {
+
+                case 1:
+                    service.displayBikesUnderMaintenance();
+                    break;
+
+                case 2:
+                    service.displayAvailableBikes();
+                    String flagId = getStringInput("Enter Bike ID to flag for maintenance: ");
+                    service.flagForMaintenance(flagId);
+                    System.out.println();
+                    break;
+
+                case 3:
+                    service.displayBikesUnderMaintenance();
+                    String clearId = getStringInput("Enter Bike ID to clear from maintenance: ");
+                    service.clearFromMaintenance(clearId);
+                    System.out.println();
+                    break;
+
+                case 4:
+                    System.out.println();
+                    return;
+            }
+        }
+    }
+
     public static void main(String[] args) {
 
         BikeRentalService service = new BikeRentalService();
@@ -183,9 +221,10 @@ public class Main {
             System.out.println("9.  Confirm Reservation");
             System.out.println("10. View Active Reservations");
             System.out.println("11. View Available Helmets");  // ── HELMET ADDED #3
-            System.out.println("12. Exit");                    // ── was 11, now 12
+            System.out.println("12. Bike Maintenance Mode");
+            System.out.println("13. Exit");
 
-            int choice = getMenuChoice(1, 12);                 // ── HELMET ADDED #4: 11 → 12
+            int choice = getMenuChoice(1, 13);
 
             switch (choice) {
 
@@ -561,11 +600,14 @@ public class Main {
                     break;
 
                 case 12:
+                    maintenanceMenu(service);
+                    break;
+
+                case 13:
                     System.out.println(
                             "Thank you for using the Bike Rental System!"
                     );
                     return;
-                // ─────────────────────────────────────────────────────────
             }
         }
     }

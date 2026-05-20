@@ -200,4 +200,53 @@ public class BikeRentalService {
         }
         return null;
     }
+
+    // ---------- Maintenance ----------
+
+    public void displayBikesUnderMaintenance() {
+        System.out.println("\n===== BIKES UNDER MAINTENANCE =====");
+        boolean found = false;
+        for (Bike bike : bikes) {
+            if (bike.isUnderMaintenance()) {
+                bike.displayInfo();
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("  No bikes are currently under maintenance.");
+        }
+        System.out.println();
+    }
+
+    public boolean flagForMaintenance(String bikeId) {
+        Bike bike = findBikeById(bikeId);
+        if (bike == null) {
+            System.out.println("  [!] Bike ID \"" + bikeId + "\" not found.");
+            return false;
+        }
+        if (bike.isUnderMaintenance()) {
+            System.out.println("  [!] Bike \"" + bikeId + "\" is already under maintenance.");
+            return false;
+        }
+        bike.setUnderMaintenance(true);
+        System.out.println("  [✓] Bike \"" + bikeId + "\" flagged for maintenance and marked unavailable.");
+        return true;
+    }
+
+    public boolean clearFromMaintenance(String bikeId) {
+        Bike bike = findBikeById(bikeId);
+        if (bike == null) {
+            System.out.println("  [!] Bike ID \"" + bikeId + "\" not found.");
+            return false;
+        }
+        if (!bike.isUnderMaintenance()) {
+            System.out.println("  [!] Bike \"" + bikeId + "\" is not under maintenance.");
+            return false;
+        }
+        bike.setUnderMaintenance(false);
+        bike.setCondition(Bike.Condition.GOOD);
+        bike.setAvailable(true);
+        System.out.println("  [✓] Bike \"" + bikeId + "\" cleared from maintenance and is now available.");
+        return true;
+    }
 }
